@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # script name: aks-flp-perf.sh
-# Version v0.0.1 20220121
+# Version v0.0.1 20240315
 # Set of tools to deploy AKS troubleshooting labs
 
 # "-l|--lab" Lab scenario to deploy
+# "-g|--resource-group" resource group to deploy the resources
 # "-r|--region" region to deploy the resources
 # "-u|--user" User alias to add on the lab name
 # "-h|--help" help info
@@ -58,7 +59,7 @@ done
 # Variable definition
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPT_NAME="$(echo $0 | sed 's|\.\/||g')"
-SCRIPT_VERSION="Version v0.0.1 20220121"
+SCRIPT_VERSION="Version v0.0.1 20240315"
 
 # Funtion definition
 
@@ -122,7 +123,7 @@ function print_usage_text () {
 # Lab scenario 1
 function lab_scenario_1 () {
     CLUSTER_NAME=aks-perf-ex${LAB_SCENARIO}-${USER_ALIAS}
-    RESOURCE_GROUP=aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    RESOURCE_GROUP=${RESOURCE_GROUP:-aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}}
     check_resourcegroup_cluster $RESOURCE_GROUP $CLUSTER_NAME
 
     echo -e "\n--> Deploying cluster for lab${LAB_SCENARIO}...\n"
@@ -181,7 +182,7 @@ EOF
 
 function lab_scenario_1_validation () {
     CLUSTER_NAME=aks-perf-ex${LAB_SCENARIO}-${USER_ALIAS}
-    RESOURCE_GROUP=aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    RESOURCE_GROUP=${RESOURCE_GROUP:-aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}}
     validate_cluster_exists $RESOURCE_GROUP $CLUSTER_NAME
 
     LAB_TAG="$(az aks show -g $RESOURCE_GROUP -n $CLUSTER_NAME --query tags -o yaml 2>/dev/null | grep aks-perf-lab | cut -d ' ' -f2 | tr -d "'")"
@@ -211,7 +212,7 @@ function lab_scenario_1_validation () {
 # Lab scenario 2
 function lab_scenario_2 () {
     CLUSTER_NAME=aks-perf-ex${LAB_SCENARIO}-${USER_ALIAS}
-    RESOURCE_GROUP=aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    RESOURCE_GROUP=${RESOURCE_GROUP:-aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}}
     check_resourcegroup_cluster $RESOURCE_GROUP $CLUSTER_NAME
 
     echo -e "\n--> Deploying cluster for lab${LAB_SCENARIO}...\n"
@@ -413,7 +414,7 @@ EOF
 
 function lab_scenario_2_validation () {
     CLUSTER_NAME=aks-perf-ex${LAB_SCENARIO}-${USER_ALIAS}
-    RESOURCE_GROUP=aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    RESOURCE_GROUP=${RESOURCE_GROUP:-aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}}
     validate_cluster_exists $RESOURCE_GROUP $CLUSTER_NAME
 
     LAB_TAG="$(az aks show -g $RESOURCE_GROUP -n $CLUSTER_NAME --query tags -o yaml 2>/dev/null | grep aks-perf-lab | cut -d ' ' -f2 | tr -d "'")"
@@ -451,7 +452,7 @@ function lab_scenario_2_validation () {
 # Lab scenario 3
 function lab_scenario_3 () {
     CLUSTER_NAME=aks-perf-ex${LAB_SCENARIO}-${USER_ALIAS}
-    RESOURCE_GROUP=aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    RESOURCE_GROUP=${RESOURCE_GROUP:-aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}}
     check_resourcegroup_cluster $RESOURCE_GROUP $CLUSTER_NAME
     
     echo -e "\n--> Deploying cluster for lab${LAB_SCENARIO}...\n"
@@ -478,7 +479,7 @@ function lab_scenario_3 () {
 
 function lab_scenario_3_validation () {
 CLUSTER_NAME=aks-perf-ex${LAB_SCENARIO}-${USER_ALIAS}
-    RESOURCE_GROUP=aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    RESOURCE_GROUP=${RESOURCE_GROUP:-aks-perf-ex${LAB_SCENARIO}-rg-${USER_ALIAS}}
     validate_cluster_exists $RESOURCE_GROUP $CLUSTER_NAME
 
     LAB_TAG="$(az aks show -g $RESOURCE_GROUP -n $CLUSTER_NAME --query tags -o yaml 2>/dev/null | grep aks-perf-lab | cut -d ' ' -f2 | tr -d "'")"
@@ -511,7 +512,8 @@ CLUSTER_NAME=aks-perf-ex${LAB_SCENARIO}-${USER_ALIAS}
 if [ $HELP -eq 1 ]
 then
 	print_usage_text
-    echo -e '"-l|--lab" Lab scenario to deploy (3 possible options)
+    echo -e '"-l|--lab" Lab scenario to deploy (4 possible options)
+"-g|--resource-group" resource group to deploy the resources
 "-r|--region" region to create the resources
 "--version" print version of aks-flp-perf
 "-h|--help" help info\n'
