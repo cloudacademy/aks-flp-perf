@@ -409,6 +409,8 @@ EOF
     kill $!; trap 'kill $!' SIGTERM
     echo -e "\n\n********************************************************"
     echo -e "\n--> Issue description: \nIdentify what is the process ID that is consuming more memory in the worker node\n"
+    echo -e "Write the process ID to a file at /home/project/top.pid\n"
+    echo -e "For example to write PID 10 use: echo 10 > /home/project/top.pid\n"
     echo -e "Cluster uri == ${CLUSTER_URI}\n"
 }
 
@@ -428,12 +430,20 @@ function lab_scenario_2_validation () {
     then
         az aks get-credentials -g $RESOURCE_GROUP -n $CLUSTER_NAME --overwrite-existing &>/dev/null
         TOP_PID="$(kubectl logs --tail=1 -l component=custom-check -n kube-system 2>/dev/null)"
-        echo -e "Enter the process ID which is using most of the memory from the node\n"
-        read -p 'PID: ' USER_PID
+        if [ -f /home/project/top.pid ]
+        then
+            USER_PID=$(tail -1 /home/project/top.pid)
+        elif [ -f ../src/top.pid ]
+        then
+            USER_PID=$(tail -1 ../src/top.pid)
+        else
+            echo -e "HINT: The PID file top.pid was not found"
+            exit 12
+        fi
         RE='^[0-9]+$'
         if ! [[ $USER_PID =~ $RE ]]
         then
-            echo -e "ERROR: The PID value $USER_PID is not valid...\n"
+            echo -e "HINT: The PID value $USER_PID is not valid...\n"
             exit 12
         fi
         if [ "$TOP_PID" == "$USER_PID" ]
@@ -539,7 +549,7 @@ if [ -z $USER_ALIAS ]; then
 fi
 
 # lab scenario has a valid option
-if [[ ! $LAB_SCENARIO =~ ^[1-2]+$ ]];
+if [[ ! $LAB_SCENARIO =~ ^[1-3]+$ ]];
 then
     echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 3\n"
     exit 11
